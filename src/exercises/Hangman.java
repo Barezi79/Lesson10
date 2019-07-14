@@ -4,6 +4,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.Stack;
 
 import javax.sound.sampled.AudioInputStream;
@@ -12,6 +14,8 @@ import javax.sound.sampled.Clip;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import examples.FileHelper;
 
 public class Hangman extends KeyAdapter {
 
@@ -27,6 +31,9 @@ public class Hangman extends KeyAdapter {
 	}
 
 	private void addPuzzles() {
+		List<String> words = FileHelper.loadFileContentsIntoArrayList("resource/words.txt");
+		Random R = new Random();
+		String word = words.get(R.nextInt(words.size()));
 		puzzles.push("defenestrate");
 		puzzles.push("fancypants");
 		puzzles.push("elements");
