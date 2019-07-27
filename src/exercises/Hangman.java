@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -23,6 +25,7 @@ public class Hangman extends KeyAdapter {
 	ArrayList<JLabel> boxes = new ArrayList<JLabel>();
 	int lives = 9;
 	JLabel livesLabel = new JLabel("" + lives);
+	List<String> words = new ArrayList<String>();
 
 	public static void main(String[] args) {
 		Hangman hangman = new Hangman();
@@ -30,13 +33,18 @@ public class Hangman extends KeyAdapter {
 		hangman.createUI();
 	}
 
+	public List<String> loadWords() {
+		return FileHelper.loadFileContentsIntoArrayList("resource/words.txt");
+	}
+
 	private void addPuzzles() {
-		List<String> words = FileHelper.loadFileContentsIntoArrayList("resource/words.txt");
-		Random R = new Random();
-		String word = words.get(R.nextInt(words.size()));
-		puzzles.push("defenestrate");
-		puzzles.push("fancypants");
-		puzzles.push("elements");
+		words = loadWords();
+		for (int i = 0; i < words.size(); i++) {
+			puzzles.push(words.get(i));
+		}
+		// puzzles.push("defenestrate");
+		// puzzles.push("fancypants");
+		// puzzles.push("elements");
 	}
 
 	JPanel panel = new JPanel();
@@ -58,9 +66,24 @@ public class Hangman extends KeyAdapter {
 		removeBoxes();
 		lives = 9;
 		livesLabel.setText("" + lives);
-		puzzle = puzzles.pop();
+		Random R = new Random();
+		int randomNum = R.nextInt(puzzles.size());
+		puzzle = puzzles.get(randomNum);
 		System.out.println("puzzle is now " + puzzle);
 		createBoxes();
+		String regex = "[$&+,:;=\\\\\\\\?@#|/'<>.^*()%!-]";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(puzzle);
+		try {
+			if (matcher.find()) {
+				throw new Exception("Special character found in puzzle: \"" + puzzle + "\"! Try a new puzzle!");
+			}
+			System.out.println("puzzle is now " + puzzle);
+			createBoxes();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			loadNextPuzzle();
+		}
 	}
 
 	public void keyTyped(KeyEvent arg0) {
@@ -98,7 +121,7 @@ public class Hangman extends KeyAdapter {
 		}
 		boxes.clear();
 	}
-	
+
 	public void playDeathKnell() {
 		try {
 			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("resource/funeral-march.wav"));
@@ -112,7 +135,3 @@ public class Hangman extends KeyAdapter {
 	}
 
 }
-
-
-
-
